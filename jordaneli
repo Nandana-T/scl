@@ -1,0 +1,49 @@
+import numpy as np
+
+def gauss_jordan_elimination(matrix):
+    rows, cols = matrix.shape
+    rref_matrix = matrix.copy().astype(float)
+
+    for i in range(rows):
+        # Make the diagonal contain all 1's
+        if rref_matrix[i, i] == 0:
+            for j in range(i + 1, rows):
+                if rref_matrix[j, i] != 0:
+                    rref_matrix[[i, j]] = rref_matrix[[j, i]]
+                    break
+        rref_matrix[i] = rref_matrix[i] / rref_matrix[i, i]
+
+        # Make the other elements in the current column 0
+        for j in range(rows):
+            if j != i:
+                rref_matrix[j] -= rref_matrix[i] * rref_matrix[j, i]
+
+    return rref_matrix
+
+def matrix_rank(matrix):
+    return np.linalg.matrix_rank(matrix)
+
+# Given matrix
+matrix = np.array([
+    [1,1,1,6],
+    [2,-1,1,3],
+    [1,0,1,4]
+])
+
+# Calculate RREF
+rref_matrix = gauss_jordan_elimination(matrix)
+
+# Calculate rank
+rank = matrix_rank(matrix)
+
+# Print the original matrix
+print("Original Matrix:")
+print(matrix)
+
+# Print the RREF
+print("\nRREF:")
+print(rref_matrix)
+
+# Print the rank
+print("\nRank:")
+print(rank)
