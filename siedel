@@ -1,0 +1,96 @@
+import numpy as np
+import sys
+
+# Function to check if a matrix is strictly diagonally dominant
+def is_diagonally_dominant(matrix):
+    n = len(matrix)
+    for i in range(n):
+        diagonal = abs(matrix[i][i])
+        off_diagonal_sum = sum(abs(matrix[i][j]) for j in range(n) if j != i)
+        if diagonal <= off_diagonal_sum:
+            return False
+    return True
+
+# Function to perform the Gauss-Seidel iteration
+def gauss_seidel(matrix, initial_guess, max_iterations=100, tolerance=1e-4):
+    n = len(matrix)
+    x = np.array(initial_guess, dtype=float)
+
+    for iteration in range(max_iterations):
+        x_new = np.copy(x)
+
+        for i in range(n):
+            sum_ax = sum(matrix[i][j] * x_new[j] for j in range(n) if j != i)
+            x_new[i] = (matrix[i][-1] - sum_ax) / matrix[i][i]
+
+        # Check for convergence
+        if np.allclose(x_new, x, atol=tolerance):
+            print(f"Converged in {iteration + 1} iterations.")
+            return x_new
+
+        x = x_new
+
+    print("Maximum iterations reached without convergence.")
+    return x_new
+
+# Function to input the augmented matrix and initial guesses
+def input_augmented_matrix_and_guesses():
+    row = int(input("Enter the number of equations: "))
+    column = int(input("Enter the number of variables: "))
+
+    # Coefficient Matrix of a given system should be a square matrix
+    if row != column:
+        print("Coefficient Matrix of a given system should be a square matrix.")
+        print("Exiting the program.")
+        sys.exit(0)
+
+    print("Enter the entries of the augmented matrix in a single line (separated by space): ")
+    entries = list(map(float, input().split()))
+    matrix = np.array(entries).reshape(row, column + 1)
+
+    # Display the augmented matrix
+    print("The given augmented matrix is:\n", matrix)
+
+    # Input for initial guesses
+    initial_guess = []
+    print("Please enter the initial values in the order of the variables:")
+    for i in range(column):
+        initial_guess.append(float(input(f"Initial guess for variable x{i}: ")))
+
+    return matrix, initial_guess
+
+# Main function to execute the Gauss-Seidel method
+def main():
+    # Input augmented matrix and initial guesses
+    matrix, initial_guess = input_augmented_matrix_and_guesses()
+
+    # Check for diagonal dominance
+    if not is_diagonally_dominant(matrix):
+        print("The matrix is not strictly diagonally dominant. Attempting to rearrange rows...")
+
+        # Attempt to rearrange rows to make the matrix diagonally dominant
+        for i in range(len(matrix)):
+            # Find the maximum element in the current column from row i onwards
+            max_index = np.argmax(np.abs(matrix[i:, i])) + i
+
+            # Swap rows if the max element is not on the current row
+            if max_index != i:
+                matrix[[i, max_index]] = matrix[[max_index, i]]
+
+        print("Rearranged matrix:\n", matrix)
+
+        if not is_diagonally_dominant(matrix):
+            print("The matrix cannot be made strictly diagonally dominant. Exiting the program.")
+            sys.exit(0)
+
+    # Call the Gauss-Seidel function
+    solution = gauss_seidel(matrix, initial_guess)
+
+    # Display the solution
+    print("The solution is:")
+    for i in range(len(solution)):
+        print(f"x{i} = {solution[i]:.4f}")
+
+# Entry point of the program
+if __name__ == "__main__":
+    main()
