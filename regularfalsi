@@ -1,0 +1,38 @@
+from sympy import *
+import numpy as np
+import matplotlib.pyplot as plt
+x=symbols('x')
+def f(eq,a):
+    return eq.subs(x,a).evalf()
+def f1(eq,a):
+    eq1=eq.diff()
+    return eq1.subs(x,a).evalf()
+def plot(eq,a,b,root):
+    x_point=np.linspace(a,b,400)
+    y_point=np.array([f(eq,i)for i in x_point])
+    plt.plot(x_point,y_point,label = str(eq),color='black')
+    plt.scatter(root,f(eq,root),color='red')
+    plt.axhline(0,color='blue',linewidth='0.5')
+    plt.axvline(root,color='blue',linewidth='0.5')
+    plt.legend()
+    plt.show()
+def regularfalsi(eq,a,b,tol=0.0001,max_iter=1000):
+    if f(eq,a)*f(eq,b)>=0:
+        raise ValueError("invalid internal")
+    count_iter=0
+    while abs(a-b)>=tol and count_iter<max_iter:
+        count_iter+=1
+        c=(a*f(eq,b)-b*f(eq,a))/(f(eq,b)-f(eq,a))
+        if f(eq,c)==0:
+            return c
+        if f(eq,c)*f(eq,a)<=0:
+            b=c
+        else:
+            a=c
+    return c
+eq=eval(input("Enter the equation: "))
+a=float(input("Enter the upper bound: "))
+b=float(input("enter the lower bound: "))
+root=regularfalsi(eq, a, b)
+print(f"Root: {root:.4f}")
+plot(eq,a,b,root)
