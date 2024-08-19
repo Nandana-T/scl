@@ -1,0 +1,76 @@
+import numpy
+
+# 
+
+class Jacobi:
+    
+    def __init__(self,elements:str,dimension : int,tolerance:float = 0.001,max_iter:int = 100):
+        
+        self.matrix = numpy.array([numpy.float32(i) for i in elements.split()]).reshape([dimension,dimension])
+        self.dimension = dimension
+        self.Tolerance = tolerance
+        self.max_iterations = max_iter
+        self.eigen_vectors = numpy.eye(self.dimension)
+        
+    def findPQ(self,matrix:numpy.ndarray):
+        
+        temp = numpy.absolute(matrix)
+        numpy.fill_diagonal(temp, -numpy.inf)
+        result = numpy.where(temp == numpy.max(temp))
+        return result[0][0],result[1][0]
+        
+    def Tolerate(self,matrix):
+        digits = int(numpy.log10(1/self.Tolerance))
+        return numpy.round(matrix,digits)
+    
+    def checkDiagonal(self,matrix):
+        
+        temp = numpy.copy(matrix)
+        numpy.fill_diagonal(temp,-numpy.inf)
+        return len(numpy.where(temp == 0)[0]) == self.dimension ** 2 - self.dimension
+        
+        
+    def perform(self):
+        
+        matrix = numpy.copy(self.matrix)
+        
+        for i in range(self.max_iterations):
+            p,q = self.findPQ(matrix)
+            
+            Θ = 0.5 * numpy.arctan2(2 * matrix[p,q],matrix[p,p] - matrix[q,q])
+            
+            sinΘ = numpy.sin(Θ)
+            cosΘ = numpy.cos(Θ)
+            
+            result = numpy.eye(self.dimension)
+            result[p,p] = result[q,q] = cosΘ
+            result[p,q] = -sinΘ
+            result[q,p] = sinΘ
+        
+            result = self.Tolerate(result)
+            d = self.Tolerate(result.T @ matrix @ result)
+            matrix = numpy.copy(d)
+
+            self.eigen_vectors = numpy.matmul(self.eigen_vectors,result)
+            if self.checkDiagonal(d):
+                break
+            
+            
+
+        self.diagonal = matrix
+
+    def display(self):
+        __,_ = numpy.linalg.eig(self.matrix)
+        print(f'\nThe Actual Eigen Vectors : \n\n{_}\n\n The Actual Eigen Values : \n{__}\n')
+        print('\nThe Diagonal matrix :\n\n',self.diagonal)
+        print('\nThe Eigen Vectors : \n\n',self.eigen_vectors)
+    
+if __name__=='__main__':
+    
+    dimension = int(input('Enter the dimension of the matrix : '))
+    elements = input('Enter the elements of the matrix : ')
+    
+    j = Jacobi(elements,dimension)
+    j.perform()
+    j.display()
+	
