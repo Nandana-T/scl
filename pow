@@ -1,0 +1,41 @@
+import numpy as np
+
+def power_method(A, max_iterations=1000, tolerance=1e-6):
+    n = A.shape[0]
+
+    # Initialize a random vector b
+    b_k = np.random.rand(n)
+
+    for iteration in range(max_iterations):
+        # Calculate the matrix-by-vector product A * b
+        b_k1 = np.dot(A, b_k)
+        # Normalize the new vector
+        b_k1_norm = np.linalg.norm(b_k1)
+        b_k1 = b_k1 / b_k1_norm
+
+        # Estimate the largest eigenvalue using the Rayleigh quotient
+        lambda_k = np.dot(b_k1.T, np.dot(A, b_k1))
+
+        # Check for convergence
+        if np.linalg.norm(b_k1 - b_k) < tolerance:
+            print(f"Converged in {iteration + 1} iterations.")
+            return lambda_k, b_k1
+
+        # Prepare for the next iteration
+        b_k = b_k1
+
+    print("Maximum iterations reached without convergence.")
+    return lambda_k, b_k1
+
+# Example usage
+if __name__ == "__main__":
+    # Define a square matrix
+    inp = list(map(float, input().split()))
+    A = np.array(inp).reshape(3,3)
+
+    # Call the power method
+    largest_eigenvalue, largest_eigenvector = power_method(A)
+
+    # Display the results
+    print(f"Largest Eigenvalue: {largest_eigenvalue:.6f}")
+    print("Largest Eigenvector:", largest_eigenvector)
