@@ -1,0 +1,39 @@
+import numpy as np
+from sympy import *
+import matplotlib.pyplot as plt
+x=symbols('x')
+def f(eq,a):
+    return eq.subs(x,a).evalf()
+def f1(eq,a):
+    eq1=eq.diff()
+    return eq1.subs(x,a).evalf()
+def plot(eq,a,b,root):
+    x_point=np.linspace(a,b,400)
+    y_point=np.array([f(eq,i)for i in x_point])
+    plt.plot(x_point,y_point,label=str(eq),color='black')
+    plt.scatter(root,f(eq,root),color='red')
+    plt.axhline(0,color='blue',linewidth=0.5)
+    plt.axvline(root,color='blue',linewidth=0.5)
+    plt.legend()
+    plt.show()
+def fixedpoint(eq,a,b,geq,tol=0.0001,max_iter=1000):
+    if f(eq,a)*f(eq,b)>=0:
+        raise ValueError("internal error")
+    x0=(a+b)/2
+    x1=f(geq,x0)
+    count_iter=0
+    while abs(x0-x1)>=tol and count_iter<max_iter:
+        x0=x1
+        x1=f(geq,x0)
+        count_iter+=1
+    if count_iter==max_iter:
+        raise ValueError("not converged")
+    return x1
+eq=eval(input("Enter the eqn: "))
+a=float(input("Enter the upper bound: "))
+b=float(input("Enter the lower bound: "))
+geq = eval(input("Enter the Equation g(x) : "))
+root = fixedpoint(eq,geq,a,b)
+print(f"root: {root:.4f}")
+plot(eq,a,b,root)
+    
